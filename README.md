@@ -4,7 +4,7 @@
 ## Run Locally
 
 **Prerequisites:**  Node.js
-
+unzip the habitoff.zip file it has all necesarry folders
 
 1. Install dependencies:
    `npm install`
