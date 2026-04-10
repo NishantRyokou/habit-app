@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Consolas", "Monaco", "Lucida Console", "Liberation Mono", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", monospace;
+  
+  --color-terminal-bg: #000000;
+  --color-terminal-green: #00FF00;
+  --color-terminal-green-dim: #008800;
+}
+
+@layer base {
+  body {
+    @apply bg-terminal-bg text-terminal-green font-mono;
+  }
+}
+
+@layer utilities {
+  .terminal-scrollbar::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+  .terminal-scrollbar::-webkit-scrollbar-track {
+    background: #000000;
+  }
+  .terminal-scrollbar::-webkit-scrollbar-thumb {
+    background: #008800;
+    border: 1px solid #00FF00;
+  }
+  .terminal-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #00FF00;
+  }
+  
+  /* Firefox */
+  .terminal-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #008800 #000000;
+  }
+}

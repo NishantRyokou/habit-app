@@ -1,0 +1,91 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: habits
+    // Fields:
+    //   - name: string (required, 1-100 chars)
+    //   - color: string (required, hex format)
+    //   - userId: string (required, matches auth.uid)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: logs
+    // Fields:
+    //   - habitId: string (required)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - completed: bool (required)
+    //   - userId: string (required, matches auth.uid)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "legamernitro@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidHabit(data) {
+      return data.keys().hasAll(['name', 'color', 'userId', 'createdAt']) &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.color is string && data.color.matches("^#[0-9a-fA-F]{6}$") &&
+             data.userId == request.auth.uid &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidLog(data) {
+      return data.keys().hasAll(['habitId', 'date', 'completed', 'userId']) &&
+             data.habitId is string &&
+             data.date is string && data.date.matches("^\\d{4}-\\d{2}-\\d{2}$") &&
+             data.completed is bool &&
+             data.userId == request.auth.uid;
+    }
+
+    match /habits/{habitId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && isValidHabit(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && 
+                     isValidHabit(request.resource.data) &&
+                     request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    match /logs/{logId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && isValidLog(request.resource.data);
+      allow update: if isOwner(resource.data.userId) && isValidLog(request.resource.data);
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    match /weeklyTasks/{id} {
+      allow read: if isOwner(resource.data.userId);
+      allow write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || resource.data.userId == request.auth.uid);
+    }
+
+    match /weeklyLogs/{id} {
+      allow read: if isOwner(resource.data.userId);
+      allow write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || resource.data.userId == request.auth.uid);
+    }
+
+    match /specialTasks/{id} {
+      allow read: if isOwner(resource.data.userId);
+      allow write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || resource.data.userId == request.auth.uid);
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+  }
+}

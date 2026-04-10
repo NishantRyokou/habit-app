@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "Habit": {
+      "title": "Habit",
+      "description": "A habit that the user wants to track.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the habit." },
+        "category": { "type": "string", "enum": ["Health", "Productivity", "Mindfulness", "Personal Development"], "description": "The category of the habit." },
+        "color": { "type": "string", "description": "The color associated with the habit (hex code)." },
+        "userId": { "type": "string", "description": "The ID of the user who owns this habit." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the habit was created." }
+      },
+      "required": ["name", "userId", "createdAt"]
+    },
+    "WeeklyTask": {
+      "title": "WeeklyTask",
+      "description": "A task that needs to be done once a week.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "userId"]
+    },
+    "WeeklyLog": {
+      "title": "WeeklyLog",
+      "description": "Log for weekly tasks.",
+      "type": "object",
+      "properties": {
+        "taskId": { "type": "string" },
+        "weekKey": { "type": "string", "description": "YYYY-MM-W (e.g. 2023-01-1)" },
+        "completed": { "type": "boolean" },
+        "userId": { "type": "string" }
+      },
+      "required": ["taskId", "weekKey", "completed", "userId"]
+    },
+    "SpecialTask": {
+      "title": "SpecialTask",
+      "description": "One-off tasks.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "date": { "type": "string", "description": "YYYY-MM-DD for daily, or YYYY-MM-W for weekly" },
+        "type": { "type": "string", "enum": ["daily", "weekly"] },
+        "completed": { "type": "boolean" },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "date", "type", "completed", "userId"]
+    },
+    "HabitLog": {
+      "title": "HabitLog",
+      "description": "A record of whether a habit was completed on a specific date.",
+      "type": "object",
+      "properties": {
+        "habitId": { "type": "string", "description": "The ID of the habit." },
+        "date": { "type": "string", "format": "date", "description": "The date of the log (YYYY-MM-DD)." },
+        "completed": { "type": "boolean", "description": "Whether the habit was completed." },
+        "userId": { "type": "string", "description": "The ID of the user who owns this log." }
+      },
+      "required": ["habitId", "date", "completed", "userId"]
+    }
+  },
+  "firestore": {
+    "/habits/{habitId}": {
+      "schema": "Habit",
+      "description": "User habits."
+    },
+    "/logs/{logId}": {
+      "schema": "HabitLog",
+      "description": "Completion logs for habits."
+    }
+  }
+}
